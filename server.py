@@ -44,30 +44,29 @@ class Server:
 class Bar:
     def __init__(self):
         dac = Dac()
-        self.meters = {'1': VuMeter(dac, 0),
-                       '2': VuMeter(dac, 1),
-                       '3': VuMeter(dac, 2),
-                       '4': VuMeter(dac, 3),
-                       '5': VuMeter(dac, 4),
-                       '6': VuMeter(dac, 5),
-                       '7': VuMeter(dac, 6),
-                       '8': VuMeter(dac, 7),
+        self.meters = {'1': VuMeter(dac, 3),
+                       '2': VuMeter(dac, 0),
+                       '3': VuMeter(dac, 1),
+                       '4': VuMeter(dac, 14),
+                       '5': VuMeter(dac, 15),
+                       '6': VuMeter(dac, 12),
+                       '7': VuMeter(dac, 13),
+                       '8': VuMeter(dac, 10),
                        'l': VuMeter(dac, 8),
                        'r': VuMeter(dac, 9),
-                       'pfl': VuMeter(dac, 10), }
-        self.led = Output(8)
+                       'pfl': VuMeter(dac, 2),
+                       'monitor': VuMeter(dac, 11)}
+        self.led = Output(3)
         self.setupShutdownMethod()
 
     def setupShutdownMethod(self):
-        import sys;
-        self.shutdown = sys.exit
-        # systemBus = dbus.SystemBus()
-        # consoleKit = systemBus.get_object(
-        #     'org.freedesktop.ConsoleKit',
-        #     '/org/freedesktop/ConsoleKit/Manager')
-        # interface = dbus.Interface(consoleKit,
-        #                            'org.freedesktop.ConsoleKit.Manager')
-        # self.shutdown = interface.get_dbus_method("Stop")
+        systemBus = dbus.SystemBus()
+        consoleKit = systemBus.get_object(
+            'org.freedesktop.ConsoleKit',
+            '/org/freedesktop/ConsoleKit/Manager')
+        interface = dbus.Interface(consoleKit,
+                                   'org.freedesktop.ConsoleKit.Manager')
+        self.shutdown = interface.get_dbus_method("Stop")
 
     def process(self, message):
         response = '1'
@@ -79,7 +78,10 @@ class Bar:
         if command == 'setMeter':
             for address, data in zip(addresses, datas):
                 if address in self.meters.keys():
-                    self.meters[address].setLevel(data)
+                    try:
+                        self.meters[address].setLevel(data)
+                    except ValueError:
+                        response = '0'
                 else:
                     response = '0'
         if command == 'shutdown':

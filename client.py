@@ -37,6 +37,6 @@ class Client():
 if __name__ == '__main__':
     client = Client()
     client.setMeter(1, 100)
-    client.setMeters([1, 2, 3, 4, 5, 6, 7, 8, 'l', 'r', 'pfl'],
-                     [i*10 for i in range(11)])
+    client.setMeters([1, 2, 3, 4, 5, 6, 7, 8, 'l', 'r', 'pfl', 'monitor'],
+                     [i*10 for i in range(12)])
     client.shutdownServer()

@@ -16,10 +16,3 @@ class Spi:
 
     def transceive(self, data):
         return self.spi.xfer2(data)
-
-class Spi:
-    def __init__(self, device):
-        pass
-
-    def transceive(self, data):
-        return print(data)
