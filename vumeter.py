@@ -1,5 +1,5 @@
 class VuMeter:
-    fullScaleVoltage = 1.2
+    fullScaleVoltage = -0.9
     def __init__(self, dac, dacchannel):
         self.dac = dac
         self.channel = dacchannel

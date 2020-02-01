@@ -1,3 +1,4 @@
+import sys
 import dbus
 import select
 import socket
@@ -43,30 +44,34 @@ class Server:
 
 class Bar:
     def __init__(self):
-        dac = Dac()
-        self.meters = {'1': VuMeter(dac, 3),
-                       '2': VuMeter(dac, 0),
-                       '3': VuMeter(dac, 1),
-                       '4': VuMeter(dac, 14),
-                       '5': VuMeter(dac, 15),
-                       '6': VuMeter(dac, 12),
-                       '7': VuMeter(dac, 13),
-                       '8': VuMeter(dac, 10),
-                       'l': VuMeter(dac, 8),
-                       'r': VuMeter(dac, 9),
-                       'pfl': VuMeter(dac, 2),
-                       'monitor': VuMeter(dac, 11)}
+        self.enableBoardSupply = Output(11)
+        self.enableBoardSupply.set()
+        self.dac = Dac()
+        self.meters = {'1': VuMeter(self.dac, 3),
+                       '2': VuMeter(self.dac, 0),
+                       '3': VuMeter(self.dac, 1),
+                       '4': VuMeter(self.dac, 14),
+                       '5': VuMeter(self.dac, 15),
+                       '6': VuMeter(self.dac, 12),
+                       '7': VuMeter(self.dac, 13),
+                       '8': VuMeter(self.dac, 10),
+                       'l': VuMeter(self.dac, 8),
+                       'r': VuMeter(self.dac, 9),
+                       'pfl': VuMeter(self.dac, 2),
+                       'monitor': VuMeter(self.dac, 11)}
         self.led = Output(3)
         self.setupShutdownMethod()
 
     def setupShutdownMethod(self):
+        self.shutdown = sys.exit
+        return
         systemBus = dbus.SystemBus()
         consoleKit = systemBus.get_object(
             'org.freedesktop.ConsoleKit',
             '/org/freedesktop/ConsoleKit/Manager')
         interface = dbus.Interface(consoleKit,
                                    'org.freedesktop.ConsoleKit.Manager')
-        self.shutdown = interface.get_dbus_method("Stop")
+        self.shutdown = interface.get_dbus_method('Stop')
 
     def process(self, message):
         response = '1'
@@ -85,6 +90,8 @@ class Bar:
                 else:
                     response = '0'
         if command == 'shutdown':
+            self.dac.setAllVoltagesV(0)
+            self.enableBoardSupply.clear()
             self.shutdown()
         return response
 
